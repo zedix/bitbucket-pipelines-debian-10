@@ -6,6 +6,9 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL en_US.UTF-8
 ENV LANGUAGE en_US:en
 
+ENV NODE_VERSION 13.x
+ENV PHP_VERSION 7.4
+
 # Install tools
 RUN apt-get -qq update && \
   apt-get -yqq install \
@@ -71,11 +74,15 @@ RUN \
  echo "\nmemory_limit=-1" >> /etc/php/7.4/cli/php.ini &&\
  echo "xdebug.max_nesting_level=250" >> /etc/php/7.4/mods-available/xdebug.ini
 
-# Install Node.js, Gulp, Yarn, Composer & PhpUnit
+# Install Node.js, NPM & Yarn
+RUN \
+ curl -sSL https://deb.nodesource.com/setup_$NODE_VERSION | bash - &&\
+ apt-get update && apt-get install -y nodejs &&\
+ npm install --no-color --production --global gulp-cli yarn n
+
+# Composer & PhpUnit
 RUN \
  curl -sSL https://getcomposer.org/installer | php -- --filename=composer --install-dir=/usr/bin &&\
  curl -sSL https://phar.phpunit.de/phpunit.phar -o /usr/bin/phpunit && chmod +x /usr/bin/phpunit &&\
  curl -sSL https://codeception.com/codecept.phar -o /usr/bin/codecept && chmod +x /usr/bin/codecept &&\
- curl -sSL https://deb.nodesource.com/setup_13.x | bash - &&\
- npm install --no-color --production --global gulp-cli webpack mocha yarn n &&\
  rm -rf /root/.npm /tmp/* /var/tmp/* /var/lib/apt/lists/* /var/log/*
