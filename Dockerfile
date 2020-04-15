@@ -18,13 +18,11 @@ RUN apt-get -qq update && \
   gettext \
   git-core \
   graphicsmagick \
-  libjpeg-turbo-progs libjpeg-progs \
   libpng-dev \
   locales \
   ntpdate \
   openssh-client \
   pngcrush optipng \
-  rsync \
   unzip \
   vim \
   wget \
@@ -32,14 +30,14 @@ RUN apt-get -qq update && \
 
 # Install locale
 RUN \
- echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen &&\
- locale-gen en_US.UTF-8 &&\
+ echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen && \
+ locale-gen en_US.UTF-8 && \
  /usr/sbin/update-locale LANG=en_US.UTF-8
 
 # Install MySQL server
 RUN \
  apt-get update && apt-get -yqq install default-mysql-client default-mysql-server \
- echo "mysql-server mysql-server/root_password password root" | debconf-set-selections &&\
+ echo "mysql-server mysql-server/root_password password root" | debconf-set-selections && \
  echo "mysql-server mysql-server/root_password_again password root" | debconf-set-selections
 
 # Configure Sury PHP repository
@@ -49,40 +47,47 @@ RUN apt-get -qq update && \
   echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list && \
   apt-get -qq update && apt-get -qqy upgrade && apt-get -q autoclean && rm -rf /var/lib/apt/lists/*
 
-# Install PHP & extensions
+# Install PHP & Extensions
 RUN \
  apt-get update &&\
  apt-get --no-install-recommends --no-install-suggests --yes --quiet install \
-  php7.4-apcu \
-  php7.4-bcmath \
-  php7.4-cli \
-  php7.4-curl \
-  php7.4-dom \
-  php7.4-fpm \
-  php7.4-gd \
-  php7.4-imagick \
-  php7.4-intl \
-  php7.4-mbstring \
-  php7.4-mysql \
-  php7.4-xdebug \
-  php7.4-xml \
-  php7.4-zip \
+  php$PHP_VERSION-apcu \
+  php$PHP_VERSION-bcmath \
+  php$PHP_VERSION-cli \
+  php$PHP_VERSION-curl \
+  php$PHP_VERSION-dom \
+  php$PHP_VERSION-fpm \
+  php$PHP_VERSION-gd \
+  php$PHP_VERSION-imagick \
+  php$PHP_VERSION-intl \
+  php$PHP_VERSION-mbstring \
+  php$PHP_VERSION-mysql \
+  php$PHP_VERSION-xdebug \
+  php$PHP_VERSION-xml \
+  php$PHP_VERSION-zip \
   && apt-get -q autoclean && rm -rf /var/lib/apt/lists/*
 
+# Configure PHP
 RUN \
- sed -ri -e "s/^variables_order.*/variables_order=\"EGPCS\"/g" /etc/php/7.4/cli/php.ini &&\
- echo "\nmemory_limit=-1" >> /etc/php/7.4/cli/php.ini &&\
- echo "xdebug.max_nesting_level=250" >> /etc/php/7.4/mods-available/xdebug.ini
+ sed -ri -e "s/^variables_order.*/variables_order=\"EGPCS\"/g" /etc/php/$PHP_VERSION/cli/php.ini && \
+ echo "\nmemory_limit=-1" >> /etc/php/$PHP_VERSION/cli/php.ini && \
+ echo "xdebug.max_nesting_level=250" >> /etc/php/$PHP_VERSION/mods-available/xdebug.ini
 
-# Install Node.js, NPM & Yarn
-RUN \
- curl -sSL https://deb.nodesource.com/setup_$NODE_VERSION | bash - &&\
- apt-get update && apt-get install -y nodejs &&\
- npm install --no-color --production --global gulp-cli yarn n
+# Install Composer
+RUN curl -sSL https://getcomposer.org/installer | php -- --filename=composer --install-dir=/usr/bin
 
-# Composer & PhpUnit
+# Install PHPUnit
+RUN curl -sSL https://phar.phpunit.de/phpunit.phar -o /usr/bin/phpunit && chmod +x /usr/bin/phpunit
+
+# Install Node.js & npm
 RUN \
- curl -sSL https://getcomposer.org/installer | php -- --filename=composer --install-dir=/usr/bin &&\
- curl -sSL https://phar.phpunit.de/phpunit.phar -o /usr/bin/phpunit && chmod +x /usr/bin/phpunit &&\
- curl -sSL https://codeception.com/codecept.phar -o /usr/bin/codecept && chmod +x /usr/bin/codecept &&\
- rm -rf /root/.npm /tmp/* /var/tmp/* /var/lib/apt/lists/* /var/log/*
+ curl -sSL https://deb.nodesource.com/setup_$NODE_VERSION | bash - && \
+ apt-get update && apt-get install -y nodejs
+
+# Install Gulp & Yarn
+RUN npm install --no-color --production --global gulp-cli yarn
+
+# Cleanup
+RUN apt-get clean -y && \
+		apt-get autoremove -y && \
+		rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/log/*
