@@ -89,5 +89,5 @@ RUN npm install --no-color --production --global gulp-cli yarn
 
 # Cleanup
 RUN apt-get clean -y && \
-		apt-get autoremove -y && \
-		rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/log/*
+ apt-get autoremove -y && \
+ rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/log/*
