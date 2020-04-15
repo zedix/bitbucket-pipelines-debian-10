@@ -10,21 +10,19 @@ ENV LANGUAGE en_US:en
 RUN apt-get -qq update && \
   apt-get -yqq install \
   apt-utils \
-  bash-completion \
   build-essential \
   curl \
   debconf \
   debconf-utils \
   default-mysql-client \
   default-mysql-server \
-  gettextt \
-  git \
+  gettext \
+  git-core \
+  graphicsmagick \
   libjpeg-turbo-progs libjpeg-progs \
-  imagemagick \
+  libpng-dev \
   locales \
-  nano \
   openssh-client \
-  patch \
   pngcrush optipng \
   rsync \
   unzip \
