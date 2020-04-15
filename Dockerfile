@@ -1,19 +1,44 @@
 FROM debian:buster-slim
 MAINTAINER Zedix
 
+# Environment variables
 ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL en_US.UTF-8
 ENV LANGUAGE en_US:en
 
+# Install tools
+RUN apt-get -qq update && \
+  apt-get -yqq install \
+  apt-utils \
+  bash-completion \
+  build-essential \
+  curl \
+  debconf \
+  debconf-utils \
+  default-mysql-client \
+  default-mysql-server \
+  gettextt \
+  git \
+  libjpeg-turbo-progs libjpeg-progs \
+  imagemagick \
+  locales \
+  nano \
+  openssh-client \
+  patch \
+  pngcrush optipng \
+  rsync \
+  unzip \
+  vim \
+  wget \
+  && apt-get -q autoclean && rm -rf /var/lib/apt/lists/*
+
 RUN \
  apt-get update &&\
- apt-get -y --no-install-recommends install curl locales apt-utils &&\
  echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen &&\
  locale-gen en_US.UTF-8 &&\
  /usr/sbin/update-locale LANG=en_US.UTF-8 &&\
  echo "mysql-server mysql-server/root_password password root" | debconf-set-selections &&\
  echo "mysql-server mysql-server/root_password_again password root" | debconf-set-selections &&\
- apt-get -y --no-install-recommends install ca-certificates gnupg git subversion imagemagick openssh-client curl software-properties-common gettext zip unzip default-mysql-server default-mysql-client apt-transport-https ruby python python3 perl memcached geoip-database make ffmpeg &&\
  curl -sSL https://deb.nodesource.com/setup_10.x | bash -
 
 # Configure Sury PHP repository
